@@ -11,8 +11,7 @@ public class CakesView {
 
     private final List<SearchCake> cakes;
 
-    @JsonCreator
-    public CakesView(@JsonProperty final List<SearchCake> cakes) {
+    public CakesView(final List<SearchCake> cakes) {
         this.cakes = cakes;
     }
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="com.fasterxml.jackson.core.jackson-core" xmlns="urn:jboss:module:1.5" slot="2.8.11">
+
+    <resources>
+        <artifact name="com.fasterxml.jackson.core:jackson-core:2.8.11"/>
+    </resources>
+
+    <dependencies>
+        <module name="javax.api"/>
+    </dependencies>
+</module>
