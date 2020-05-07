@@ -31,7 +31,9 @@
     <properties>
         <cpp.repo.name>cake-shop</cpp.repo.name>
 
-        <plugins.maven.wildfly.version>2.0.2.Final</plugins.maven.wildfly.version>
+        <wildfly.version>19.1.0.Final</wildfly.version>
+        <wildfly.maven.plugin.version>2.0.2.Final</wildfly.maven.plugin.version>
+
         <framework-api.version>4.2.1</framework-api.version>
         <framework.version>6.5.0-M5</framework.version>
         <event-store.version>2.5.0-M3</event-store.version>
@@ -125,7 +127,7 @@
                 <plugin>
                     <groupId>org.wildfly.plugins</groupId>
                     <artifactId>wildfly-maven-plugin</artifactId>
-                    <version>${plugins.maven.wildfly.version}</version>
+                    <version>${wildfly.maven.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
