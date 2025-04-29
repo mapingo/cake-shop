@@ -4,6 +4,18 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Update event-store to 17.103.0-M2 for event-buffer refactor:
+  - Run each event sent to the event listeners in its own transaction
+  - Update the `stream_status` table with `latest_known_position`
+  - Mark stream as 'up_to_date' when all events from event-buffer successfully processed
+  - New column `latest_known_position` in `stream_status table`
+  - New column `is_up_to_date` in `stream_status table`
+  - New liquibase scripts to update stream_status table
+  - New SubscriptionManager class `NewSubscriptionManager`to handle the new way of processing events
+  - New replacement StreamStatusRepository class for data access of stream_status table
+- Jmx MBean `SystemCommanderMBean` now only takes basic Java Objects to keep the JMX handling interoperable
+
 ### Added
 - Implemented error handling for events
 - New tables in viewstore `stream_error` and `stream_error_hash` for storing errors on a stream 
@@ -13,9 +25,6 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Inserts into `stream_error` now `DO NOTHING` if a row with the same `stream_id`, `component_name` and `source` on the `stream`error` already exists
 - Inserts into `stream_error` are therefore idempotent
 - No longer removing stream_errors before inserting a new error, as the insert is now idempotent
-
-### Changed
-- Jmx MBean `SystemCommanderMBean` now only takes basic Java Objects to keep the JMX handling interoperable
 ### Removed
 - Removed `JmxCommandParameters` and `CommandRunMode` from JMX SystemCommanderMBean call
 
