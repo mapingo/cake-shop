@@ -5,7 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 ### Changed
-- Update event-store to 17.103.0-M2 for event-buffer refactor:
+- Update event-store for event-buffer refactor:
   - Run each event sent to the event listeners in its own transaction
   - Update the `stream_status` table with `latest_known_position`
   - Mark stream as 'up_to_date' when all events from event-buffer successfully processed
@@ -14,6 +14,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
   - New liquibase scripts to update stream_status table
   - New SubscriptionManager class `NewSubscriptionManager`to handle the new way of processing events
   - New replacement StreamStatusRepository class for data access of stream_status table
+  - Change name of jndi value for self-healing from `event.error.handling.enabled` to `event.stream.self.healing.enabled`
 - Jmx MBean `SystemCommanderMBean` now only takes basic Java Objects to keep the JMX handling interoperable
 
 ### Added
