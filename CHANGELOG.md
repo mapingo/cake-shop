@@ -5,6 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 ### Changed
+- Addition of secret scanning and dependabot to the project
 - Update event-store for event-buffer refactor:
   - Run each event sent to the event listeners in its own transaction
   - Update the `stream_status` table with `latest_known_position`
