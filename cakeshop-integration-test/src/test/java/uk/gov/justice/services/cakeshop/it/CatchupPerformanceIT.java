@@ -53,19 +53,11 @@ public class CatchupPerformanceIT {
     private final Poller longPoller = new Poller(2400, 1000L);
     private final BatchEventInserter batchEventInserter = new BatchEventInserter(eventStoreDataSource, BATCH_INSERT_SIZE);
 
-    private Client client;
-
     @BeforeEach
     public void before() {
-        client = new RestEasyClientFactory().createResteasyClient();
         databaseCleaner.cleanEventStoreTables(DB_CONTEXT_NAME);
         cleanViewstoreTables();
         databaseCleaner.cleanSystemTables(DB_CONTEXT_NAME);
-    }
-
-    @AfterEach
-    public void cleanup() {
-        client.close();
     }
 
     @Test
