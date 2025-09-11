@@ -1,11 +1,11 @@
 package uk.gov.justice.services.cakeshop.it.helpers;
 
-import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
-
 import static uk.gov.justice.services.cakeshop.it.helpers.SystemPropertyFinder.findWildflyManagementPort;
 import static uk.gov.justice.services.cakeshop.it.helpers.SystemPropertyFinder.hasRandomJmsPortConfigured;
 import static uk.gov.justice.services.jmx.system.command.client.connection.JmxParametersBuilder.jmxParameters;
 import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
+
+import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
 
 public class JmxParametersFactory {
     private static final String HOST = getHost();

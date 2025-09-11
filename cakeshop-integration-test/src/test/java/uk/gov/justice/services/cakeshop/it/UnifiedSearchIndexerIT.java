@@ -1,16 +1,5 @@
 package uk.gov.justice.services.cakeshop.it;
 
-import java.util.UUID;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.Response;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import uk.gov.justice.services.cakeshop.it.helpers.ApiResponse;
-import uk.gov.justice.services.cakeshop.it.helpers.Querier;
-import uk.gov.justice.services.cakeshop.it.helpers.RestEasyClientFactory;
-import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
-
 import static com.jayway.jsonassert.JsonAssert.with;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
@@ -24,6 +13,20 @@ import static uk.gov.justice.services.cakeshop.it.helpers.TestConstants.DB_CONTE
 import static uk.gov.justice.services.cakeshop.it.params.CakeShopMediaTypes.ORDER_CAKE_MEDIA_TYPE;
 import static uk.gov.justice.services.cakeshop.it.params.CakeShopUris.ORDERS_RESOURCE_URI;
 import static uk.gov.justice.services.test.utils.core.matchers.HttpStatusCodeMatcher.isStatus;
+
+import uk.gov.justice.services.cakeshop.it.helpers.ApiResponse;
+import uk.gov.justice.services.cakeshop.it.helpers.Querier;
+import uk.gov.justice.services.cakeshop.it.helpers.RestEasyClientFactory;
+import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
+
+import java.util.UUID;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.core.Response;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class UnifiedSearchIndexerIT {
 

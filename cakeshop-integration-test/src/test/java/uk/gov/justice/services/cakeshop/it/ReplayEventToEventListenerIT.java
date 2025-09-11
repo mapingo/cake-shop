@@ -1,23 +1,5 @@
 package uk.gov.justice.services.cakeshop.it;
 
-import java.time.ZonedDateTime;
-import java.util.Optional;
-import java.util.UUID;
-import javax.sql.DataSource;
-import org.junit.Before;
-import org.junit.Test;
-import uk.gov.justice.services.cakeshop.it.helpers.DatabaseManager;
-import uk.gov.justice.services.cakeshop.it.helpers.JmxParametersFactory;
-import uk.gov.justice.services.cakeshop.it.helpers.ProcessedEventFinder;
-import uk.gov.justice.services.cakeshop.it.helpers.PublishedEventInserter;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.PublishedEvent;
-import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
-import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClient;
-import uk.gov.justice.services.jmx.system.command.client.TestSystemCommanderClientFactory;
-import uk.gov.justice.services.subscription.ProcessedEvent;
-import uk.gov.justice.services.test.utils.core.messaging.Poller;
-import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
-
 import static java.time.ZoneOffset.UTC;
 import static java.util.UUID.fromString;
 import static org.hamcrest.CoreMatchers.is;
@@ -27,6 +9,27 @@ import static uk.gov.justice.services.cakeshop.it.helpers.TestConstants.CONTEXT_
 import static uk.gov.justice.services.eventstore.management.commands.ReplayEventToEventListenerCommand.REPLAY_EVENT_TO_EVENT_LISTENER;
 import static uk.gov.justice.services.jmx.api.mbean.CommandRunMode.GUARDED;
 
+import uk.gov.justice.services.cakeshop.it.helpers.DatabaseManager;
+import uk.gov.justice.services.cakeshop.it.helpers.JmxParametersFactory;
+import uk.gov.justice.services.cakeshop.it.helpers.LinkedEventInserter;
+import uk.gov.justice.services.cakeshop.it.helpers.ProcessedEventFinder;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.LinkedEvent;
+import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
+import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClient;
+import uk.gov.justice.services.jmx.system.command.client.TestSystemCommanderClientFactory;
+import uk.gov.justice.services.subscription.ProcessedEvent;
+import uk.gov.justice.services.test.utils.core.messaging.Poller;
+import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
+
+import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.sql.DataSource;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 public class ReplayEventToEventListenerIT {
 
     private final TestSystemCommanderClientFactory systemCommanderClientFactory = new TestSystemCommanderClientFactory();
@@ -34,11 +37,11 @@ public class ReplayEventToEventListenerIT {
     private final DataSource eventStoreDataSource = new DatabaseManager().initEventStoreDb();
     private final DataSource viewStoreDataSource = new DatabaseManager().initViewStoreDb();
     private final DatabaseCleaner databaseCleaner = new DatabaseCleaner();
-    private final PublishedEventInserter publishedEventInserter = new PublishedEventInserter(eventStoreDataSource);
+    private final LinkedEventInserter linkedEventInserter = new LinkedEventInserter(eventStoreDataSource);
     private final ProcessedEventFinder processedEventFinder = new ProcessedEventFinder(viewStoreDataSource);
     private final Poller poller = new Poller();
 
-    @Before
+    @BeforeEach
     public void cleanDatabases() {
         final String contextName = "framework";
 
@@ -50,12 +53,12 @@ public class ReplayEventToEventListenerIT {
     @Test
     public void shouldReplaySingleEventToEventListenerUsingTheReplayEventToEventListenerJmxCommand() throws Exception {
 
-        final PublishedEvent publishedEvent = createPublishedEvent();
-        publishedEventInserter.insert(publishedEvent);
+        final LinkedEvent linkedEvent = createlinkedEvent();
+        linkedEventInserter.insert(linkedEvent);
 
         try (final SystemCommanderClient systemCommanderClient = systemCommanderClientFactory.create(JmxParametersFactory.buildJmxParameters())) {
 
-            final UUID commandRuntimeId = publishedEvent.getId();
+            final UUID commandRuntimeId = linkedEvent.getId();
             final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = new JmxCommandRuntimeParameters.JmxCommandRuntimeParametersBuilder()
                     .withCommandRuntimeId(commandRuntimeId)
                     .build();
@@ -68,20 +71,20 @@ public class ReplayEventToEventListenerIT {
 
         final Optional<ProcessedEvent> processedEvent = poller.pollUntilFound(
                 () -> {
-                    System.out.printf("Polling processed_event table for existence of event id: %s", publishedEvent.getId());
-                    return processedEventFinder.findProcessedEvent(publishedEvent.getId());
+                    System.out.printf("Polling processed_event table for existence of event id: %s", linkedEvent.getId());
+                    return processedEventFinder.findProcessedEvent(linkedEvent.getId());
                 }
         );
 
         if (processedEvent.isPresent()) {
-            assertThat(processedEvent.get().getEventId(), is(publishedEvent.getId()));
+            assertThat(processedEvent.get().getEventId(), is(linkedEvent.getId()));
             assertThat(processedEvent.get().getComponentName(), is("EVENT_LISTENER"));
         } else {
             fail();
         }
     }
 
-    private PublishedEvent createPublishedEvent() {
+    private LinkedEvent createlinkedEvent() {
         final UUID eventId = fromString("19adc152-89f7-4829-b41d-8e880d552b14");
         final UUID streamId = fromString("bf1f11c9-9164-4a36-bfac-a037b1ee5775");
         final Long positionInStream = 1L;
@@ -92,7 +95,7 @@ public class ReplayEventToEventListenerIT {
         final Long eventNumber = 1L;
         final Long previousEventNumber = 0L;
 
-        return new PublishedEvent(
+        return new LinkedEvent(
                 eventId,
                 streamId,
                 positionInStream,

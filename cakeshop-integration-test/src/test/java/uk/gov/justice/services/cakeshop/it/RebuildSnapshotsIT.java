@@ -2,7 +2,6 @@ package uk.gov.justice.services.cakeshop.it;
 
 import static java.lang.String.format;
 import static java.util.Optional.empty;
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;

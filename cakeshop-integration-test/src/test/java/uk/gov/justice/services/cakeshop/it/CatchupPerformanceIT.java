@@ -18,7 +18,6 @@ import uk.gov.justice.services.cakeshop.it.helpers.DatabaseManager;
 import uk.gov.justice.services.cakeshop.it.helpers.JmxParametersFactory;
 import uk.gov.justice.services.cakeshop.it.helpers.PositionInStreamIterator;
 import uk.gov.justice.services.cakeshop.it.helpers.ProcessedEventFinder;
-import uk.gov.justice.services.cakeshop.it.helpers.RestEasyClientFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
 import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClient;
@@ -32,9 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.sql.DataSource;
-import javax.ws.rs.client.Client;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -143,8 +140,6 @@ public class CatchupPerformanceIT {
 
         batchEventInserter.updateEventStreamTable(streamIds);
         batchEventInserter.updateEventLogTable(events);
-        batchEventInserter.updatePublishQueueTableWithEvents(events);
-
     }
 
     private void runCatchup() throws Exception {
