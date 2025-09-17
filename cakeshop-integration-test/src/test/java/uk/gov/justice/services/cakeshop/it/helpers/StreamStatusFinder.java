@@ -1,15 +1,16 @@
 package uk.gov.justice.services.cakeshop.it.helpers;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
-import javax.sql.DataSource;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import javax.sql.DataSource;
 
 public class StreamStatusFinder {
 

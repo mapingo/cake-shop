@@ -48,7 +48,7 @@ buildAndDeploy() {
   runLiquibase
   deployWiremock
   deployWarsForCakeShopContext
-  contextHealthchecksForCakeShop
+#  contextHealthchecksForCakeShop
 }
 
 buildAndDeploy

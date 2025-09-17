@@ -8,15 +8,15 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
 import uk.gov.justice.domain.snapshot.DefaultObjectInputStreamStrategy;
+import uk.gov.justice.services.cakeshop.domain.aggregate.Recipe;
+import uk.gov.justice.services.cakeshop.it.helpers.CommandSender;
+import uk.gov.justice.services.cakeshop.it.helpers.DatabaseManager;
 import uk.gov.justice.services.cakeshop.it.helpers.EventFactory;
 import uk.gov.justice.services.cakeshop.it.helpers.Querier;
 import uk.gov.justice.services.cakeshop.it.helpers.RestEasyClientFactory;
 import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedException;
 import uk.gov.justice.services.eventsourcing.jdbc.snapshot.SnapshotJdbcRepository;
 import uk.gov.justice.services.eventsourcing.jdbc.snapshot.StandaloneSnapshotJdbcRepositoryFactory;
-import uk.gov.justice.services.cakeshop.domain.aggregate.Recipe;
-import uk.gov.justice.services.cakeshop.it.helpers.CommandSender;
-import uk.gov.justice.services.cakeshop.it.helpers.DatabaseManager;
 
 import java.util.Optional;
 import java.util.UUID;

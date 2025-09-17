@@ -20,6 +20,8 @@ import static uk.gov.justice.services.cakeshop.it.params.CakeShopUris.RECIPES_RE
 import static uk.gov.justice.services.cakeshop.it.params.CakeShopUris.RECIPES_RESOURCE_URI;
 import static uk.gov.justice.services.test.utils.core.matchers.HttpStatusCodeMatcher.isStatus;
 
+import uk.gov.justice.services.cakeshop.it.helpers.CommandSender;
+import uk.gov.justice.services.cakeshop.it.helpers.DatabaseManager;
 import uk.gov.justice.services.cakeshop.it.helpers.EventFactory;
 import uk.gov.justice.services.cakeshop.it.helpers.EventFinder;
 import uk.gov.justice.services.cakeshop.it.helpers.Querier;
@@ -27,8 +29,6 @@ import uk.gov.justice.services.cakeshop.it.helpers.RestEasyClientFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventRepositoryFactory;
-import uk.gov.justice.services.cakeshop.it.helpers.CommandSender;
-import uk.gov.justice.services.cakeshop.it.helpers.DatabaseManager;
 import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 
 import java.io.File;

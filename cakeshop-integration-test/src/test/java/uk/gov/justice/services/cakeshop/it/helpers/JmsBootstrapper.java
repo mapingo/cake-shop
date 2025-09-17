@@ -1,7 +1,11 @@
 package uk.gov.justice.services.cakeshop.it.helpers;
 
-import com.jayway.jsonpath.JsonPath;
+import static javax.jms.Session.AUTO_ACKNOWLEDGE;
+
+import uk.gov.justice.services.test.utils.core.messaging.Poller;
+
 import java.util.Optional;
+
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -11,10 +15,9 @@ import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
-import uk.gov.justice.services.test.utils.core.messaging.Poller;
 
-import static javax.jms.Session.AUTO_ACKNOWLEDGE;
+import com.jayway.jsonpath.JsonPath;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 
 public class JmsBootstrapper {
 

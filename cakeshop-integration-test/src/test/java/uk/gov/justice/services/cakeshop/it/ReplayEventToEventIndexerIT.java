@@ -11,9 +11,9 @@ import static uk.gov.justice.services.eventstore.management.commands.ReplayEvent
 import static uk.gov.justice.services.jmx.api.mbean.CommandRunMode.FORCED;
 
 import uk.gov.justice.services.cakeshop.it.helpers.DatabaseManager;
+import uk.gov.justice.services.cakeshop.it.helpers.LinkedEventInserter;
 import uk.gov.justice.services.cakeshop.it.helpers.ProcessedEventFinder;
-import uk.gov.justice.services.cakeshop.it.helpers.PublishedEventInserter;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.PublishedEvent;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.LinkedEvent;
 import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
 import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters.JmxCommandRuntimeParametersBuilder;
 import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClient;
@@ -38,7 +38,7 @@ public class ReplayEventToEventIndexerIT {
     private final DataSource eventStoreDataSource = new DatabaseManager().initEventStoreDb();
     private final DataSource viewStoreDataSource = new DatabaseManager().initViewStoreDb();
     private final DatabaseCleaner databaseCleaner = new DatabaseCleaner();
-    private final PublishedEventInserter publishedEventInserter = new PublishedEventInserter(eventStoreDataSource);
+    private final LinkedEventInserter linkedEventInserter = new LinkedEventInserter(eventStoreDataSource);
     private final ProcessedEventFinder processedEventFinder = new ProcessedEventFinder(viewStoreDataSource);
     private final Poller poller = new Poller();
 
@@ -54,12 +54,12 @@ public class ReplayEventToEventIndexerIT {
     @Test
     public void shouldReplaySingleEventToEventIndexerUsingTheReplayEventToEventIndexerJmxCommand() throws Exception {
 
-        final PublishedEvent publishedEvent = createPublishedEvent();
-        publishedEventInserter.insert(publishedEvent);
+        final LinkedEvent linkedEvent = createlinkedEvent();
+        linkedEventInserter.insert(linkedEvent);
 
         try (final SystemCommanderClient systemCommanderClient = testSystemCommanderClientFactory.create(buildJmxParameters())) {
 
-            final UUID commandRuntimeId = publishedEvent.getId();
+            final UUID commandRuntimeId = linkedEvent.getId();
             final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = new JmxCommandRuntimeParametersBuilder()
                     .withCommandRuntimeId(commandRuntimeId)
                     .build();
@@ -74,20 +74,20 @@ public class ReplayEventToEventIndexerIT {
 
         final Optional<ProcessedEvent> processedEvent = poller.pollUntilFound(
                 () -> {
-                    System.out.printf("Polling processed_event table for existence of event id: %s\n", publishedEvent.getId());
-                    return processedEventFinder.findProcessedEvent(publishedEvent.getId());
+                    System.out.printf("Polling processed_event table for existence of event id: %s\n", linkedEvent.getId());
+                    return processedEventFinder.findProcessedEvent(linkedEvent.getId());
                 }
         );
 
         if (processedEvent.isPresent()) {
-            assertThat(processedEvent.get().getEventId(), is(publishedEvent.getId()));
+            assertThat(processedEvent.get().getEventId(), is(linkedEvent.getId()));
             assertThat(processedEvent.get().getComponentName(), is("EVENT_INDEXER"));
         } else {
             fail();
         }
     }
 
-    private PublishedEvent createPublishedEvent() {
+    private LinkedEvent createlinkedEvent() {
         final UUID eventId = fromString("19adc152-89f7-4829-b41d-8e880d552b14");
         final UUID streamId = fromString("bf1f11c9-9164-4a36-bfac-a037b1ee5775");
         final Long positionInStream = 1L;
@@ -98,7 +98,7 @@ public class ReplayEventToEventIndexerIT {
         final Long eventNumber = 1L;
         final Long previousEventNumber = 0L;
 
-        return new PublishedEvent(
+        return new LinkedEvent(
                 eventId,
                 streamId,
                 positionInStream,

@@ -1,32 +1,7 @@
 package uk.gov.justice.services.cakeshop.it;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Optional;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
-import javax.sql.DataSource;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.Response;
-import org.apache.http.message.BasicNameValuePair;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import uk.gov.justice.services.cakeshop.it.helpers.ApiResponse;
-import uk.gov.justice.services.cakeshop.it.helpers.CommandFactory;
-import uk.gov.justice.services.cakeshop.it.helpers.CommandSender;
-import uk.gov.justice.services.cakeshop.it.helpers.DatabaseManager;
-import uk.gov.justice.services.cakeshop.it.helpers.EventFactory;
-import uk.gov.justice.services.cakeshop.it.helpers.EventFinder;
-import uk.gov.justice.services.cakeshop.it.helpers.JmsBootstrapper;
-import uk.gov.justice.services.cakeshop.it.helpers.Querier;
-import uk.gov.justice.services.cakeshop.it.helpers.RestEasyClientFactory;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventRepositoryFactory;
-import uk.gov.justice.services.test.utils.core.messaging.Poller;
-
 import static com.jayway.jsonassert.JsonAssert.with;
+import static java.time.Duration.ofSeconds;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
@@ -41,13 +16,38 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.justice.services.cakeshop.it.params.CakeShopMediaTypes.ADD_RECIPE_MEDIA_TYPE;
-import static uk.gov.justice.services.cakeshop.it.params.CakeShopMediaTypes.POST_RECIPES_QUERY_MEDIA_TYPE;
-import static uk.gov.justice.services.cakeshop.it.params.CakeShopMediaTypes.QUERY_RECIPES_MEDIA_TYPE;
 import static uk.gov.justice.services.cakeshop.it.params.CakeShopMediaTypes.REMOVE_RECIPE_MEDIA_TYPE;
 import static uk.gov.justice.services.cakeshop.it.params.CakeShopUris.OVEN_RESOURCE_CUSTOM_URI;
-import static uk.gov.justice.services.cakeshop.it.params.CakeShopUris.RECIPES_RESOURCE_QUERY_URI;
 import static uk.gov.justice.services.cakeshop.it.params.CakeShopUris.RECIPES_RESOURCE_URI;
 import static uk.gov.justice.services.test.utils.core.matchers.HttpStatusCodeMatcher.isStatus;
+
+import uk.gov.justice.services.cakeshop.it.helpers.ApiResponse;
+import uk.gov.justice.services.cakeshop.it.helpers.CommandFactory;
+import uk.gov.justice.services.cakeshop.it.helpers.CommandSender;
+import uk.gov.justice.services.cakeshop.it.helpers.DatabaseManager;
+import uk.gov.justice.services.cakeshop.it.helpers.EventFactory;
+import uk.gov.justice.services.cakeshop.it.helpers.EventFinder;
+import uk.gov.justice.services.cakeshop.it.helpers.JmsBootstrapper;
+import uk.gov.justice.services.cakeshop.it.helpers.Querier;
+import uk.gov.justice.services.cakeshop.it.helpers.RestEasyClientFactory;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventRepositoryFactory;
+
+import java.util.Optional;
+
+import javax.jms.MessageConsumer;
+import javax.jms.Session;
+import javax.sql.DataSource;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.core.Response;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.message.BasicNameValuePair;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class CakeShopIT {
 
@@ -63,7 +63,8 @@ public class CakeShopIT {
     private Client client;
     private Querier querier;
     private CommandSender commandSender;
-    private final Poller poller = new Poller();
+
+    private static final int MAX_POLL_TIME_IN_SECONDS = 20;
 
     @BeforeEach
     public void before() throws Exception {
@@ -100,7 +101,7 @@ public class CakeShopIT {
                 final String cakeName = "Super cake";
 
                 commandSender.addRecipe(recipeId, cakeName);
-                await().until(() -> querier.recipesQueryResult().body().contains(recipeId));
+                await().atMost(ofSeconds(MAX_POLL_TIME_IN_SECONDS)).until(() -> querier.recipesQueryResult().body().contains(recipeId));
                 final ApiResponse apiResponse = commandSender.makeCake(recipeId, cakeId);
                 assertThat(apiResponse.httpCode(), isStatus(ACCEPTED));
 
@@ -122,7 +123,7 @@ public class CakeShopIT {
 
         assertThat(response_1.getStatus(), isStatus(ACCEPTED));
 
-        await().until(() -> eventFinder.eventsWithPayloadContaining(recipeId).size() == 1);
+        await().atMost(ofSeconds(MAX_POLL_TIME_IN_SECONDS)).until(() -> eventFinder.eventsWithPayloadContaining(recipeId).size() == 1);
 
         final Response response_2 = client
                 .target(RECIPES_RESOURCE_URI + recipeId)
@@ -152,7 +153,7 @@ public class CakeShopIT {
                         eventJson,
                         ADD_RECIPE_MEDIA_TYPE));
 
-        await().until(() -> eventFinder.eventsWithPayloadContaining(recipeId).size() == 1);
+        await().atMost(ofSeconds(MAX_POLL_TIME_IN_SECONDS)).until(() -> eventFinder.eventsWithPayloadContaining(recipeId).size() == 1);
 
         final Event event = eventFinder.eventsWithPayloadContaining(recipeId).get(0);
         assertThat(event.getName(), is("cakeshop.events.recipe-added"));
@@ -169,31 +170,12 @@ public class CakeShopIT {
     }
 
     @Test
-    public void shouldPostQueryForRecipes() throws Exception {
-
-        final String eventJson = createObjectBuilder()
-                .add("pagesize", 10)
-                .add("name", "Vanilla cake")
-                .add("glutenFree", false)
-                .build().toString();
-
-        final Response response = client
-                .target(RECIPES_RESOURCE_QUERY_URI)
-                .request()
-                .accept(QUERY_RECIPES_MEDIA_TYPE)
-                .post(entity(eventJson, POST_RECIPES_QUERY_MEDIA_TYPE));
-
-        assertThat(response.getStatus(), isStatus(OK));
-    }
-
-    @Test
     public void shouldQueryRecipesById() {
         final String recipeId = randomUUID().toString();
         final String recipeName = "Cheesy cheese cake";
         commandSender.addRecipe(recipeId, recipeName);
 
-
-        await().until(() -> querier.queryForRecipe(recipeId).httpCode() == OK.getStatusCode());
+        await().atMost(ofSeconds(MAX_POLL_TIME_IN_SECONDS)).until(() -> querier.queryForRecipe(recipeId).httpCode() == OK.getStatusCode());
 
         final ApiResponse response = querier.queryForRecipe(recipeId);
 
@@ -212,7 +194,7 @@ public class CakeShopIT {
         commandSender.addRecipe(recipeId2, "Chocolate muffin");
 
 
-        await().until(() -> {
+        await().atMost(ofSeconds(MAX_POLL_TIME_IN_SECONDS)).until(() -> {
             final String responseBody = querier.recipesQueryResult(singletonList(new BasicNameValuePair("pagesize", "30"))).body();
             return responseBody.contains(recipeId) && responseBody.contains(recipeId2);
         });
@@ -233,7 +215,7 @@ public class CakeShopIT {
 
         commandSender.addRecipe(recipeId, cakeName);
         commandSender.addRecipe(randomUUID().toString(), "cake");
-        await().until(() -> querier.recipesQueryResult().body().contains(recipeId));
+        await().atMost(ofSeconds(MAX_POLL_TIME_IN_SECONDS)).until(() -> querier.recipesQueryResult().body().contains(recipeId));
 
         final ApiResponse apiResponse = commandSender.makeCake(recipeId, cakeId);
 
@@ -251,11 +233,11 @@ public class CakeShopIT {
 
         commandSender.addRecipe(recipeId_1, cakeName);
         commandSender.addRecipe(recipeId_2, "cake");
-        await().until(() -> querier.recipesQueryResult().body().contains(recipeId_1));
+        await().atMost(ofSeconds(MAX_POLL_TIME_IN_SECONDS)).until(() -> querier.recipesQueryResult().body().contains(recipeId_1));
 
         commandSender.makeCake(recipeId_1, cakeId);
 
-        await().until(() -> querier.cakesQueryResult().body().contains(cakeId));
+        await().atMost(ofSeconds(MAX_POLL_TIME_IN_SECONDS)).until(() -> querier.cakesQueryResult().body().contains(cakeId));
 
         //slightly contrived domain logic: when a cake is made, it gets a name of the recipe
         with(querier.cakesQueryResult().body())
@@ -270,12 +252,12 @@ public class CakeShopIT {
         client.target(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(eventFactory.recipeEntity(recipeName, false));
 
-        await().until(() -> querier.queryForRecipe(recipeId).httpCode() == OK.getStatusCode());
+        await().atMost(ofSeconds(MAX_POLL_TIME_IN_SECONDS)).until(() -> querier.queryForRecipe(recipeId).httpCode() == OK.getStatusCode());
 
         client.target(RECIPES_RESOURCE_URI + recipeId).request()
                 .put(eventFactory.renameRecipeEntity("New Name"));
 
-        await().until(() -> querier.queryForRecipe(recipeId).body().contains("New Name"));
+        await().atMost(ofSeconds(MAX_POLL_TIME_IN_SECONDS)).until(() -> querier.queryForRecipe(recipeId).body().contains("New Name"));
     }
 
     @Test

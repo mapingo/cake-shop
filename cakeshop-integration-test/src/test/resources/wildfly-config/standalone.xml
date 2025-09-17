@@ -91,6 +91,9 @@
             <logger category="com.arjuna">
                 <level name="WARN"/>
             </logger>
+            <logger category="org.jboss.as.ejb3.timer">
+                <level name="ERROR"/>
+            </logger>
             <logger category="io.jaegertracing.Configuration">
                 <level name="WARN"/>
             </logger>
@@ -780,10 +783,14 @@
                 <simple name="java:/app/cakeshop-service/default.strategy.snapshot.threshold" value="3" type="java.lang.String"/>
                 <simple name="java:/app/cakeshop-service/jobstore.timer.interval.milliseconds" value="100" type="java.lang.String"/>
                 <simple name="java:/app/cakeshop-service/jobstore.timer.start.wait.milliseconds" value="200" type="java.lang.String"/>
+
+                <simple name="java:/app/cakeshop-service/event.linking.worker.timer.interval.milliseconds" value="200" type="java.lang.String"/>
+                <simple name="java:/app/cakeshop-service/event.linking.worker.time.between.runs.milliseconds" value="100" type="java.lang.String"/>
+                <simple name="java:/app/cakeshop-service/event.publishing.worker.timer.interval.milliseconds" value="200" type="java.lang.String"/>
+                <simple name="java:/app/cakeshop-service/event.publishing.worker.time.between.runs.milliseconds" value="100" type="java.lang.String"/>
+
                 <simple name="java:global/event.stream.self.healing.enabled" value="true" type="java.lang.String"/>
                 <simple name="java:global/envelope.validation.exception.handler" value="uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler" type="java.lang.String"/>
-                <simple name="java:global/pre.publish.timer.max.runtime.milliseconds" value="450" type="java.lang.String"/>
-                <simple name="java:global/event.dequer.timer.max.runtime.milliseconds" value="450" type="java.lang.String"/>
             </bindings>
             <remote-naming/>
         </subsystem>
